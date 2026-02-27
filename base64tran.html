@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Base64 编解码器</title>
+  <style>
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .container {
+      background-color: #1e1e1e;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.7);
+      width: 100%;
+      max-width: 600px;
+    }
+    h1 {
+      text-align: center;
+      color: #bb86fc;
+      margin-bottom: 20px;
+    }
+    .input-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      color: #cfcdcd;
+    }
+    textarea, input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background-color: #2d2d2d;
+      color: #e0e0e0;
+      font-family: monospace;
+    }
+    input[type="file"] {
+      padding: 8px;
+    }
+    .button-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 6px;
+      background-color: #6200ee;
+      color: white;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #3700b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      border: 1px solid #333;
+      border-radius: 6px;
+      background-color: #2d2d2d;
+      word-break: break-all;
+      white-space: pre-wrap;
+    }
+    .preview {
+      margin-top: 15px;
+      text-align: center;
+    }
+    .preview img {
+      max-width: 100%;
+      border-radius: 6px;
+      border: 1px solid #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Base64 编解码器</h1>
+    <div class="input-group">
+      <label>输入文本</label>
+      <textarea id="textInput" rows="4" placeholder="请输入要编码的文本..."></textarea>
+    </div>
+    <div class="button-group">
+      <button onclick="encodeText()">文本 → Base64</button>
+      <button onclick="decodeText()">Base64 → 文本</button>
+    </div>
+    <div class="input-group">
+      <label>上传图片</label>
+      <input type="file" id="imageInput" accept="image/*">
+    </div>
+    <div class="button-group">
+      <button onclick="encodeImage()">图片 → Base64</button>
+      <button onclick="clearAll()">清空</button>
+    </div>
+    <div class="result" id="result">结果将显示在这里...</div>
+    <div class="preview" id="preview"></div>
+  </div>
+
+  <script>
+    function encodeText() {
+      const text = document.getElementById('textInput').value;
+      const result = btoa(encodeURIComponent(text).replace(/%([0-9A-F]{2})/g, (match, hex) => String.fromCharCode(parseInt(hex, 16))));
+      document.getElementById('result').innerText = result;
+    }
+
+    function decodeText() {
+      const base64 = document.getElementById('textInput').value;
+      try {
+        const text = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        document.getElementById('result').innerText = text;
+      } catch (e) {
+        document.getElementById('result').innerText = '解码失败：无效的 Base64 字符串';
+      }
+    }
+
+    function encodeImage() {
+      const input = document.getElementById('imageInput');
+      const preview = document.getElementById('preview');
+      const resultDiv = document.getElementById('result');
+      
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onloadend = function() {
+          const base64 = reader.result;
+          resultDiv.innerText = base64;
+          preview.innerHTML = `<img src="${base64}" alt="预览">`;
+        };
+        reader.readAsDataURL(input.files[0]);
+      } else {
+        resultDiv.innerText = '请先选择一张图片';
+      }
+    }
+
+    function clearAll() {
+      document.getElementById('textInput').value = '';
+      document.getElementById('imageInput').value = '';
+      document.getElementById('result').innerText = '结果将显示在这里...';
+      document.getElementById('preview').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
